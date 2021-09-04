@@ -2,7 +2,7 @@
  * To learn more about HTML Serializer check out the Prismic documentation
  * https://prismic.io/docs/vuejs/beyond-the-api/html-serializer
  */
- import type { HTMLFunctionSerializer } from '@prismicio/helpers'
+import type { HTMLFunctionSerializer } from '@prismicio/helpers'
 import { Link, RichText } from 'prismic-dom'
 import linkResolver from './link-resolver'
 
