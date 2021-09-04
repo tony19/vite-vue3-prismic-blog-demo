@@ -14,11 +14,14 @@
   </section>
 </template>
 
-<script>
-import { defineComponent, defineAsyncComponent } from 'vue'
+<script lang="ts">
+import { defineComponent, defineAsyncComponent, PropType } from 'vue'
+import type { Slice } from '@prismicio/types'
 
 export default defineComponent({
-  props: ['slices'],
+  props: {
+    slices: Array as PropType<Slice[]>,
+  },
   name: 'slices-block',
   components: {
     QuoteSlice: defineAsyncComponent(() => import('@/components/slices/QuoteSlice.vue')),
