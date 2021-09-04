@@ -7,12 +7,18 @@
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent, PropType } from 'vue'
+import type { Slice } from '@prismicio/types'
+
+export default defineComponent({
   name: 'quote-slice',
   props: {
-    slice: Object,
+    slice: {
+      type: Object as PropType<Slice>,
+      required: true,
+    }
   },
-}
+})
 </script>
 
 <style scoped>
