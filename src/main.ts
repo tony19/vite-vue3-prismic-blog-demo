@@ -9,7 +9,7 @@ import router from './router'
 createApp(App)
   .use(router)
   .use(createPrismic({
-    endpoint: window.prismic.endpoint,
+    endpoint: 'https://blog-demo2.prismic.io/api/v2',
     linkResolver,
     htmlSerializer
   }))
