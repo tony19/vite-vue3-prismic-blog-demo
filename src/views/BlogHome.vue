@@ -50,25 +50,23 @@ export default defineComponent({
     this.getContent()
   },
   methods: {
-    getContent() {
-      this.$prismic.client.getSingle('blog_home', {})
-        .then(document => {
-          if (document) {
-            this.documentId = document.id
-            this.fields.headline = document.data.headline as RichTextField
-            this.fields.description = document.data.description as RichTextField
-            this.fields.image = document.data.image as ImageField
-            this.checkForContent()
-          } else {
-            this.$router.push({ name: 'not-found' })
-          }
-        })
+    async getContent() {
+      const document = await this.$prismic.client.getSingle('blog_home', {})
+      if (document) {
+        this.documentId = document.id
+        this.fields.headline = document.data.headline as RichTextField
+        this.fields.description = document.data.description as RichTextField
+        this.fields.image = document.data.image as ImageField
+        this.checkForContent()
+      } else {
+        this.$router.push({ name: 'not-found' })
+      }
     },
     checkForContent() {
       if (
-        this.fields.image !== undefined ||
-        this.$prismic.asText(this.fields.headline as RichTextField) !== '' ||
-        this.$prismic.asText(this.fields.description as RichTextField) !== ''
+        this.fields.image?.url ||
+        this.$prismic.asText(this.fields.headline as RichTextField) ||
+        this.$prismic.asText(this.fields.description as RichTextField)
       ) {
         this.hasContent = true
       }
@@ -100,7 +98,6 @@ export default defineComponent({
   font-family: 'Lato', sans-serif;
   border-bottom: 1px solid #DADADA;
 }
-/* Media Queries */
 @media (max-width: 767px) {
   .home {
     padding: 0 20px;
