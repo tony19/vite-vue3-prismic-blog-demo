@@ -1,11 +1,11 @@
 <template>
   <div v-if="posts.length" class="blog-main">
-    <div v-for="post in posts" :key="post.id" v-bind:post="post" class="blog-post">
-      <router-link :to="linkResolver(post)">
+    <div v-for="post in posts" :key="post.id" class="blog-post">
+      <router-link :to="linkResolver?.(post)">
         <h2 v-if="post.data.title">{{ $prismic.asText(post.data.title) }}</h2>
         <template v-if="post.data.date">
           <p class="blog-post-meta">
-            <span class="created-at">{{ Intl.DateTimeFormat('en-US', dateOptions).format(new Date(post.data.date)) }}</span>
+            <span class="created-at">{{ formatDate(post.data.date) }}</span>
           </p>
         </template>
         <div>
@@ -19,28 +19,32 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { onMounted, ref, defineComponent } from 'vue'
 import { usePrismic } from '@prismicio/vue'
+import type { Slice, PrismicDocument } from '@prismicio/types'
 
 export default defineComponent({
   name: 'blog-posts',
   setup() {
     const { client, options, predicate } = usePrismic()
-    const posts = ref([])
+    const posts = ref([] as PrismicDocument[])
 
-    const getPosts = () => {
-      client
-        .query(predicate.at('document.type', 'post'), { orderings : '[my.post.date desc]' })
-        .then(response => posts.value = response.results)
-    }
+    onMounted(async () => {
+      const response = await client.get({
+        predicates: predicate.at('document.type', 'post'),
+        orderings : 'my.post.date desc',
+      })
+      posts.value = response.results
+    })
 
-    const getFirstParagraph = (post, textLimit = 300) => {
+    const getFirstParagraph = (post: PrismicDocument, textLimit = 300) => {
+      if (!post.data.body) return
+
       let firstParagraph = ''
-
-      for (const slice of post.data.body) {
+      for (const slice of post.data.body as Slice[]) {
         if (slice.slice_type === 'text') {
-          firstParagraph = slice.primary.text.find(b => b.type === 'paragraph')?.text
+          firstParagraph = (slice.primary.text as any[]).find(b => b.type === 'paragraph')?.text
           if (firstParagraph) break
         }
       }
@@ -53,13 +57,16 @@ export default defineComponent({
       }
     }
 
-    onMounted(getPosts)
+    const formatDate = (date: string | number | Date) => {
+      const dateOptions = { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions
+      return Intl.DateTimeFormat('en-US', dateOptions).format(new Date(date))
+    }
 
     return {
       posts,
       getFirstParagraph,
-      dateOptions: { year: 'numeric', month: 'short', day: '2-digit' },
       linkResolver: options.linkResolver,
+      formatDate,
     }
   }
 })
