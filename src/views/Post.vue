@@ -17,6 +17,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import SlicesBlock from '@/components/SlicesBlock.vue'
+import type { RichTextField, DateField, Slice } from '@prismicio/types'
 
 export default defineComponent({
   name: 'post',
@@ -25,32 +26,35 @@ export default defineComponent({
   },
   data() {
     return {
-      dateOptions: { year: 'numeric', month: 'short', day: '2-digit' },
+      dateOptions: { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions,
       documentId: '',
       fields: {
         title: null,
         date: null,
+      } as {
+        title: RichTextField | null,
+        date: DateField | null,
       },
-      slices: []
+      slices: [] as Slice[]
     }
   },
   created() {
-    this.getContent(this.$route.params.uid)
+    this.getContent(this.$route.params.uid as string)
   },
   beforeRouteUpdate(to, from, next) {
-    this.getContent(to.params.uid)
+    this.getContent(to.params.uid as string)
     next()
   },
   methods: {
     getContent(uid: string) {
       this.$prismic.client.getByUID('post', uid, {})
-        .then((document) => {
+        .then(document => {
           if (document) {
             this.documentId = document.id
-            this.fields.title = document.data.title
-            this.fields.date = document.data.date
-            this.slices = document.data.body
-          } 
+            this.fields.title = document.data.title as RichTextField
+            this.fields.date = document.data.date as DateField
+            this.slices = document.data.body as Slice[]
+          }
           else {
             this.$router.push({ name: 'not-found' })
           }
