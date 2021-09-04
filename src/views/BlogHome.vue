@@ -1,8 +1,6 @@
 <template>
   <div v-if="hasContent" class="page">
     <div class="home">
-      <!-- Button to edit document in dashboard -->
-      <!-- <prismic-edit-button :documentId="documentId"/> -->
       <div class="blog-avatar" :style="{ backgroundImage: 'url(' + fields.image?.url + ')' }">
       </div>
 
@@ -20,58 +18,60 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, reactive, ref, onMounted } from 'vue'
 import BlogPosts from '@/components/BlogPosts.vue'
 import type { RichTextField, ImageField } from '@prismicio/types'
+import { usePrismic } from '@prismicio/vue'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'blog-home',
   components: {
     BlogPosts
   },
-  data() {
-    return {
-      documentId: '',
-      fields: {
-        headline: null,
-        description: null,
-        image: null
-      } as {
-        headline: RichTextField | null,
-        description: RichTextField | null,
-        image: ImageField | null
-      },
-      posts: [],
-      linkResolver: this.$prismic.options.linkResolver,
-      hasContent: false
-    }
-  },
-  created() {
-    this.getContent()
-  },
-  methods: {
-    async getContent() {
-      const document = await this.$prismic.client.getSingle('blog_home', {})
-      if (document) {
-        this.documentId = document.id
-        this.fields.headline = document.data.headline as RichTextField
-        this.fields.description = document.data.description as RichTextField
-        this.fields.image = document.data.image as ImageField
-        this.checkForContent()
-      } else {
-        this.$router.push({ name: 'not-found' })
-      }
-    },
-    checkForContent() {
+  setup() {
+    const fields = reactive({
+      headline: null,
+      description: null,
+      image: null
+    } as {
+      headline: RichTextField | null,
+      description: RichTextField | null,
+      image: ImageField | null
+    })
+    const hasContent = ref(false)
+    const { client, asText } = usePrismic()
+    const router = useRouter()
+
+    const checkForContent = () => {
       if (
-        this.fields.image?.url ||
-        this.$prismic.asText(this.fields.headline as RichTextField) ||
-        this.$prismic.asText(this.fields.description as RichTextField)
+        fields.image?.url ||
+        asText(fields.headline as RichTextField) ||
+        asText(fields.description as RichTextField)
       ) {
-        this.hasContent = true
+        hasContent.value = true
       }
-    },
-  },
+    }
+
+    const getContent = async () => {
+      const document = await client.getSingle('blog_home', {})
+      if (document) {
+        fields.headline = document.data.headline as RichTextField
+        fields.description = document.data.description as RichTextField
+        fields.image = document.data.image as ImageField
+        checkForContent()
+      } else {
+        router.push({ name: 'not-found' })
+      }
+    }
+
+    onMounted(getContent)
+
+    return {
+      hasContent,
+      fields,
+    }
+  }
 })
 </script>
 
