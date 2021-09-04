@@ -25,24 +25,25 @@
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent, PropType } from 'vue'
+import type { Slice, RichTextField, ImageField } from '@prismicio/types'
+
+export default defineComponent({
   name: 'image-caption-slice',
   props: {
-    slice: Object,
-  },
-  data() {
-    return {
-      img: '',
-      caption: '',
-      size: '',
+    slice: {
+      type: Object as PropType<Slice>,
+      required: true,
     }
   },
-  created() {
-    this.img = this.slice.primary.image
-    this.caption = this.slice.primary.caption
-    this.size = this.slice.slice_label
-  }
-}
+  setup(props) {
+    return {
+      img: props.slice.primary.image as ImageField,
+      caption: props.slice.primary.caption as RichTextField,
+      size: props.slice.slice_label as string,
+    }
+  },
+})
 </script>
 
 <style scoped>
