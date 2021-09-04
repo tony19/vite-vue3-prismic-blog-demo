@@ -5,19 +5,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePrismic } from '@prismicio/vue'
 
 export default defineComponent({
   name: 'preview',
   setup() {
-    const { token, documentId } = useRoute().query
-    const { client, predicate } = usePrismic()
-    client.getPreviewResolver(token as string, documentId as string).resolve(this.$prismic.linkResolver, '/')
-      .then((url) => {
-        window.location.replace(url)
+    onMounted(async () => {
+      const { token, documentId } = useRoute().query
+      const { client, options } = usePrismic()
+
+      const url = await client.resolvePreviewURL({
+        linkResolver: options.linkResolver,
+        defaultURL: '/',
+        previewToken: token as string,
+        documentId: documentId as string,
       })
+      window.location.replace(url)
+    })
   }
 })
 </script>
