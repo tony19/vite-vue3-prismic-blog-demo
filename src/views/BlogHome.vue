@@ -3,13 +3,13 @@
     <div class="home">
       <!-- Button to edit document in dashboard -->
       <!-- <prismic-edit-button :documentId="documentId"/> -->
-      <div class="blog-avatar" :style="{ backgroundImage: 'url(' + fields.image + ')' }">
+      <div class="blog-avatar" :style="{ backgroundImage: 'url(' + fields.image?.url + ')' }">
       </div>
 
-      <h1 class="blog-title">
+      <h1 class="blog-title" v-if="fields.headline">
         {{ $prismic.asText(fields.headline) }}
       </h1>
-      <p class="blog-description">{{ $prismic.asText(fields.description) }}</p>
+      <p v-if="fields.description" class="blog-description">{{ $prismic.asText(fields.description) }}</p>
     </div>
     <blog-posts/>
   </div>
@@ -22,6 +22,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import BlogPosts from '@/components/BlogPosts.vue'
+import type { RichTextField, ImageField } from '@prismicio/types'
 
 export default defineComponent({
   name: 'blog-home',
@@ -35,9 +36,13 @@ export default defineComponent({
         headline: null,
         description: null,
         image: null
+      } as {
+        headline: RichTextField | null,
+        description: RichTextField | null,
+        image: ImageField | null
       },
       posts: [],
-      linkResolver: this.$prismic.linkResolver,
+      linkResolver: this.$prismic.options.linkResolver,
       hasContent: false
     }
   },
@@ -47,12 +52,12 @@ export default defineComponent({
   methods: {
     getContent() {
       this.$prismic.client.getSingle('blog_home', {})
-        .then((document) => {
+        .then(document => {
           if (document) {
             this.documentId = document.id
-            this.fields.headline = document.data.headline
-            this.fields.description = document.data.description
-            this.fields.image = document.data.image.url
+            this.fields.headline = document.data.headline as RichTextField
+            this.fields.description = document.data.description as RichTextField
+            this.fields.image = document.data.image as ImageField
             this.checkForContent()
           } else {
             this.$router.push({ name: 'not-found' })
@@ -62,8 +67,8 @@ export default defineComponent({
     checkForContent() {
       if (
         this.fields.image !== undefined ||
-        this.$prismic.richTextAsPlain(this.fields.headline) !== '' ||
-        this.$prismic.richTextAsPlain(this.fields.description) !== ''
+        this.$prismic.asText(this.fields.headline as RichTextField) !== '' ||
+        this.$prismic.asText(this.fields.description as RichTextField) !== ''
       ) {
         this.hasContent = true
       }
