@@ -1,5 +1,4 @@
 import { createApp } from 'vue'
-// @ts-ignore
 import { createPrismic } from '@prismicio/vue'
 import linkResolver from './prismic/link-resolver'
 import htmlSerializer from './prismic/html-serializer'
