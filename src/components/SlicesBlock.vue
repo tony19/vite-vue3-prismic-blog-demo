@@ -20,7 +20,10 @@ import type { Slice } from '@prismicio/types'
 
 export default defineComponent({
   props: {
-    slices: Array as PropType<Slice[]>,
+    slices: {
+      type: Array as PropType<Slice[]>,
+      required: true,
+    },
   },
   name: 'slices-block',
   components: {
