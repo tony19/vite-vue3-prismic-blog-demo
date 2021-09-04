@@ -4,63 +4,69 @@
       <div class="back">
         <router-link to="./">back to list</router-link>
       </div>
-      <!-- Button to edit document in dashboard -->
-      <!-- <prismic-edit-button :documentId="documentId"/> -->
 
       <h1 class="blog-title" v-if="fields.title">{{ $prismic.asText(fields.title) }}</h1>
-      <p class="blog-post-meta" v-if="fields.date"><span class="created-at">{{ Intl.DateTimeFormat('en-US', dateOptions).format(new Date(fields.date)) }}</span></p>
+      <p class="blog-post-meta" v-if="fields.date"><span class="created-at">{{ formatDate(fields.date) }}</span></p>
     </div>
     <slices-block :slices="slices"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, reactive, ref, onMounted } from 'vue'
 import SlicesBlock from '@/components/SlicesBlock.vue'
 import type { RichTextField, DateField, Slice } from '@prismicio/types'
+import { usePrismic } from '@prismicio/vue'
+import { useRouter, useRoute, onBeforeRouteUpdate } from 'vue-router'
 
 export default defineComponent({
   name: 'post',
   components: {
     SlicesBlock
   },
-  data() {
-    return {
-      dateOptions: { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions,
-      documentId: '',
-      fields: {
+  setup() {
+    const fields = reactive({
         title: null,
         date: null,
       } as {
         title: RichTextField | null,
         date: DateField | null,
-      },
-      slices: [] as Slice[]
+      }
+    )
+    const slices = ref([] as Slice[])
+
+    const { client } = usePrismic()
+    const router = useRouter()
+
+    const getContent = async(uid: string) => {
+      const document = await client.getByUID('post', uid, {})
+      if (document) {
+        fields.title = document.data.title as RichTextField
+        fields.date = document.data.date as DateField
+        slices.value = document.data.body as Slice[]
+      } else {
+        router.push({ name: 'not-found' })
+      }
     }
-  },
-  created() {
-    this.getContent(this.$route.params.uid as string)
-  },
-  beforeRouteUpdate(to, from, next) {
-    this.getContent(to.params.uid as string)
-    next()
-  },
-  methods: {
-    getContent(uid: string) {
-      this.$prismic.client.getByUID('post', uid, {})
-        .then(document => {
-          if (document) {
-            this.documentId = document.id
-            this.fields.title = document.data.title as RichTextField
-            this.fields.date = document.data.date as DateField
-            this.slices = document.data.body as Slice[]
-          }
-          else {
-            this.$router.push({ name: 'not-found' })
-          }
-        })
+
+    const formatDate = (date: string | number | Date) => {
+      const dateOptions = { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions
+      return Intl.DateTimeFormat('en-US', dateOptions).format(new Date(date))
     }
-  },
+
+    onBeforeRouteUpdate((to, from, next) => {
+      getContent(to.params.uid as string)
+      next()
+    })
+
+    onMounted(() => getContent(useRoute().params.uid as string))
+
+    return {
+      formatDate,
+      slices,
+      fields,
+    }
+  }
 })
 </script>
 
@@ -79,7 +85,6 @@ export default defineComponent({
   margin-bottom: 8px;
 }
 
-/* Media Queries */
 @media (max-width: 767px) {
   .post-part pre {
     font-size: 14px;
