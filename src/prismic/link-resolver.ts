@@ -4,16 +4,14 @@
  */
 import type { LinkResolverFunction } from '@prismicio/helpers'
 
-const resolver: LinkResolverFunction<string> = (doc) => {
+const resolver: LinkResolverFunction<string> = doc => {
   if (doc.isBroken) {
     return '/not-found'
   }
 
   if (doc.type === 'blog_home') {
     return '/blog'
-  }
-
-  if (doc.type === 'post') {
+  } else if (doc.type === 'post') {
     return '/blog/' + doc.uid
   }
 
