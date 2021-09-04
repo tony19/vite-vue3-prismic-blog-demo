@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900" rel="stylesheet" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script>
+      window.prismic = {
+        endpoint: 'https://blog-demo2.prismic.io/api/v2'
+      }
+    </script>
+    <script async defer src="https://static.cdn.prismic.io/prismic.js?new=true&repo=blog-demo2"></script>
+    <script src="https://static.cdn.prismic.io/prismic.min.js"></script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
