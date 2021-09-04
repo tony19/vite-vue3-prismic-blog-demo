@@ -19,13 +19,13 @@ import { defineComponent, defineAsyncComponent, PropType } from 'vue'
 import type { Slice } from '@prismicio/types'
 
 export default defineComponent({
+  name: 'slices-block',
   props: {
     slices: {
       type: Array as PropType<Slice[]>,
       required: true,
     },
   },
-  name: 'slices-block',
   components: {
     QuoteSlice: defineAsyncComponent(() => import('@/components/slices/QuoteSlice.vue')),
     TextSlice: defineAsyncComponent(() => import('@/components/slices/TextSlice.vue')),
