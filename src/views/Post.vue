@@ -47,7 +47,7 @@ export default defineComponent({
       const document = await this.$prismic.client.getByUID('post', uid, {})
       if (document) {
         this.documentId = document.id
-        this.title = document.data.title
+        this.title = this.$prismic.asText(document.data.title)
         this.date = formatDate(document.data.date as string)
         this.slices = document.data.body
       } else {
