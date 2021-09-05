@@ -1,14 +1,15 @@
 <template>
   <div class='post-part single container'>
     <blockquote class="block-quotation">
-      {{ $prismic.asText(slice.primary.quote) }}
+      {{ quote }}
     </blockquote>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import type { Slice } from '@prismicio/types'
+import type { RichTextField, Slice } from '@prismicio/types'
+import { usePrismic } from '@prismicio/vue'
 
 export default defineComponent({
   name: 'quote-slice',
@@ -18,6 +19,12 @@ export default defineComponent({
       required: true,
     }
   },
+  setup(props) {
+    const { asText } = usePrismic()
+    return {
+      quote: asText(props.slice.primary.quote as RichTextField)
+    }
+  }
 })
 </script>
 
