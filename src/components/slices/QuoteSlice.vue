@@ -7,9 +7,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import type { RichTextField, Slice } from '@prismicio/types'
-import { usePrismic } from '@prismicio/vue'
+import { defineComponent, PropType } from '@vue/composition-api'
+import type { Slice } from '@prismicio/types'
 
 export default defineComponent({
   name: 'quote-slice',
@@ -19,10 +18,9 @@ export default defineComponent({
       required: true,
     }
   },
-  setup(props) {
-    const { asText } = usePrismic()
+  data() {
     return {
-      quote: asText(props.slice.primary.quote as RichTextField)
+      quote: this.$prismic.asText(this.slice.primary.quote)
     }
   }
 })
