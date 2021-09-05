@@ -1,8 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 import BlogHome from './views/BlogHome.vue'
 
-export default createRouter({
-  history: createWebHistory(),
+Vue.use(VueRouter)
+
+export default new VueRouter({
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -34,6 +37,6 @@ export default createRouter({
     }
   ],
   scrollBehavior() {
-    return { left: 0, top: 0 }
+    return { x: 0, y: 0 }
   }
 })
