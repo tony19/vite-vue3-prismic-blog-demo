@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="size === 'image-full-width'">
-      <div class='blog-header single' :style="{ 'background-image': 'url(' + img.url + ')'}">
+      <div class='blog-header single' :style="{ backgroundImage }">
         <template v-if="$prismic.asText(caption) != ''">
           <div class="wrapper">
             <h1>{{ $prismic.asText(caption) }}</h1>
@@ -37,8 +37,10 @@ export default defineComponent({
     }
   },
   setup(props) {
+    const img = props.slice.primary.image as ImageField
     return {
-      img: props.slice.primary.image as ImageField,
+      img,
+      backgroundImage: img.url ? `url(${img.url})` : '',
       caption: props.slice.primary.caption as RichTextField,
       size: props.slice.slice_label as string,
     }
