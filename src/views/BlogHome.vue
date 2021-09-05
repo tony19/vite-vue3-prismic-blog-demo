@@ -1,13 +1,13 @@
 <template>
   <div v-if="hasContent" class="page">
     <div class="home">
-      <div class="blog-avatar" :style="{ backgroundImage: 'url(' + fields.image?.url + ')' }">
+      <div class="blog-avatar" :style="{ backgroundImage }">
       </div>
 
-      <h1 class="blog-title" v-if="fields.headline">
-        {{ $prismic.asText(fields.headline) }}
+      <h1 class="blog-title">
+        {{ fields.headline }}
       </h1>
-      <p v-if="fields.description" class="blog-description">{{ $prismic.asText(fields.description) }}</p>
+      <p class="blog-description">{{ fields.description }}</p>
     </div>
     <blog-posts/>
   </div>
@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from 'vue'
+import { defineComponent, reactive, ref, onMounted, computed } from 'vue'
 import BlogPosts from '@/components/BlogPosts.vue'
 import type { RichTextField, ImageField } from '@prismicio/types'
 import { usePrismic } from '@prismicio/vue'
@@ -35,9 +35,9 @@ export default defineComponent({
       description: null,
       image: null
     } as {
-      headline: RichTextField | null,
-      description: RichTextField | null,
-      image: ImageField | null
+      headline: string | null,
+      description: string | null,
+      image: string | null
     })
     const hasContent = ref(false)
     const { client, asText } = usePrismic()
@@ -45,29 +45,28 @@ export default defineComponent({
 
     const checkForContent = () => {
       if (
-        fields.image?.url ||
-        asText(fields.headline as RichTextField) ||
-        asText(fields.description as RichTextField)
+        fields.image ||
+        fields.headline ||
+        fields.description
       ) {
         hasContent.value = true
       }
     }
 
-    const getContent = async () => {
+    onMounted(async () => {
       const document = await client.getSingle('blog_home', {})
       if (document) {
-        fields.headline = document.data.headline as RichTextField
-        fields.description = document.data.description as RichTextField
-        fields.image = document.data.image as ImageField
+        fields.headline = asText(document.data.headline as RichTextField)
+        fields.description = asText(document.data.description as RichTextField)
+        fields.image = (document.data.image as ImageField)?.url ?? ''
         checkForContent()
       } else {
         router.push({ name: 'not-found' })
       }
-    }
-
-    onMounted(getContent)
+    })
 
     return {
+      backgroundImage: computed(() => fields.image ? `url(${fields.image})` : ''),
       hasContent,
       fields,
     }
