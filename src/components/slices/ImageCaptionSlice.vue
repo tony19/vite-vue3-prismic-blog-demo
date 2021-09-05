@@ -2,9 +2,9 @@
   <div>
     <template v-if="size === 'image-full-width'">
       <div class='blog-header single' :style="{ backgroundImage }">
-        <template v-if="$prismic.asText(caption) != ''">
+        <template v-if="caption">
           <div class="wrapper">
-            <h1>{{ $prismic.asText(caption) }}</h1>
+            <h1>{{ caption }}</h1>
           </div>
         </template>
       </div>
@@ -14,9 +14,9 @@
         <p class="block-img" :class="size">
           <prismic-image :field="img"/>
         </p>
-        <template v-if="$prismic.asText(caption) != ''">
+        <template v-if="caption">
           <p>
-            <span class="image-label">{{ $prismic.asText(caption) }}</span>
+            <span class="image-label">{{ caption }}</span>
           </p>
         </template>
       </div>
@@ -25,8 +25,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import type { Slice, RichTextField, ImageField } from '@prismicio/types'
+import { defineComponent, PropType } from '@vue/composition-api'
+import type { Slice, ImageField } from '@prismicio/types'
 
 export default defineComponent({
   name: 'image-caption-slice',
@@ -36,13 +36,13 @@ export default defineComponent({
       required: true,
     }
   },
-  setup(props) {
-    const img = props.slice.primary.image as ImageField
+  data() {
+    const img = this.slice.primary.image as ImageField
     return {
       img,
       backgroundImage: img.url ? `url(${img.url})` : '',
-      caption: props.slice.primary.caption as RichTextField,
-      size: props.slice.slice_label as string,
+      caption: this.$prismic.asText(this.slice.primary.caption),
+      size: this.slice.slice_label as string,
     }
   },
 })
