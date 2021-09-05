@@ -5,19 +5,24 @@
         <router-link to="./">back to list</router-link>
       </div>
 
-      <h1 class="blog-title">{{ fields.title }}</h1>
-      <p class="blog-post-meta" v-if="fields.date"><span class="created-at">{{ formatDate(fields.date) }}</span></p>
+      <h1 class="blog-title">{{ title }}</h1>
+      <p class="blog-post-meta"><span v-if="date" class="created-at">{{ date }}</span></p>
     </div>
     <slices-block :slices="slices"/>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted } from 'vue'
+import { defineComponent, reactive, ref, onMounted, computed } from 'vue'
 import SlicesBlock from '@/components/SlicesBlock.vue'
 import type { RichTextField, DateField, Slice } from '@prismicio/types'
 import { usePrismic } from '@prismicio/vue'
 import { useRouter, useRoute, onBeforeRouteUpdate } from 'vue-router'
+
+const formatDate = (date: Date) => {
+  const dateOptions = { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions
+  return Intl.DateTimeFormat('en-US', dateOptions).format(new Date(date))
+}
 
 export default defineComponent({
   name: 'post',
@@ -49,11 +54,6 @@ export default defineComponent({
       }
     }
 
-    const formatDate = (date: string | number | Date) => {
-      const dateOptions = { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions
-      return Intl.DateTimeFormat('en-US', dateOptions).format(new Date(date))
-    }
-
     onBeforeRouteUpdate((to, from, next) => {
       getContent(to.params.uid as string)
       next()
@@ -62,9 +62,9 @@ export default defineComponent({
     onMounted(() => getContent(useRoute().params.uid as string))
 
     return {
-      formatDate,
+      date: computed(() => fields.date ? formatDate(fields.date as Date) : ''),
       slices,
-      fields,
+      title: fields.title,
     }
   }
 })
