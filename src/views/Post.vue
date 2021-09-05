@@ -5,7 +5,7 @@
         <router-link to="./">back to list</router-link>
       </div>
 
-      <h1 class="blog-title" v-if="fields.title">{{ $prismic.asText(fields.title) }}</h1>
+      <h1 class="blog-title">{{ fields.title }}</h1>
       <p class="blog-post-meta" v-if="fields.date"><span class="created-at">{{ formatDate(fields.date) }}</span></p>
     </div>
     <slices-block :slices="slices"/>
@@ -26,23 +26,23 @@ export default defineComponent({
   },
   setup() {
     const fields = reactive({
-        title: null,
+        title: '',
         date: null,
       } as {
-        title: RichTextField | null,
-        date: DateField | null,
+        title: string,
+        date: Date | null,
       }
     )
     const slices = ref([] as Slice[])
 
-    const { client } = usePrismic()
+    const { client, asText, asDate } = usePrismic()
     const router = useRouter()
 
     const getContent = async(uid: string) => {
       const document = await client.getByUID('post', uid, {})
       if (document) {
-        fields.title = document.data.title as RichTextField
-        fields.date = document.data.date as DateField
+        fields.title = asText(document.data.title as RichTextField)
+        fields.date = asDate(document.data.date as DateField) as Date
         slices.value = document.data.body as Slice[]
       } else {
         router.push({ name: 'not-found' })
