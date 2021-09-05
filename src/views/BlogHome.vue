@@ -31,13 +31,13 @@ export default defineComponent({
   },
   setup() {
     const fields = reactive({
-      headline: null,
-      description: null,
-      image: null
+      headline: '',
+      description: '',
+      image: '',
     } as {
-      headline: string | null,
-      description: string | null,
-      image: string | null
+      headline: string,
+      description: string,
+      image: string,
     })
     const hasContent = ref(false)
     const { client, asText } = usePrismic()
