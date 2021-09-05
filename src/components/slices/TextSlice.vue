@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType } from '@vue/composition-api'
 import type { Slice } from '@prismicio/types'
 
 export default defineComponent({
