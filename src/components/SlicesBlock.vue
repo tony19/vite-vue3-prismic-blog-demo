@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, defineAsyncComponent, PropType } from 'vue'
+import { defineComponent, PropType } from '@vue/composition-api'
 import type { Slice } from '@prismicio/types'
 
 export default defineComponent({
@@ -27,9 +27,9 @@ export default defineComponent({
     },
   },
   components: {
-    QuoteSlice: defineAsyncComponent(() => import('@/components/slices/QuoteSlice.vue')),
-    TextSlice: defineAsyncComponent(() => import('@/components/slices/TextSlice.vue')),
-    ImageCaptionSlice: defineAsyncComponent(() => import('@/components/slices/ImageCaptionSlice.vue')),
+    QuoteSlice: () => import('@/components/slices/QuoteSlice.vue'),
+    TextSlice: () => import('@/components/slices/TextSlice.vue'),
+    ImageCaptionSlice: () => import('@/components/slices/ImageCaptionSlice.vue'),
   },
 })
 </script>
