@@ -33,7 +33,6 @@ export default defineComponent({
       image: '',
       posts: [],
       linkResolver: this.$prismic.linkResolver,
-      hasContent: false
     }
   },
   mounted() {
