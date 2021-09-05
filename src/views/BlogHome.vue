@@ -5,9 +5,9 @@
       </div>
 
       <h1 class="blog-title">
-        {{ fields.headline }}
+        {{ headline }}
       </h1>
-      <p class="blog-description">{{ fields.description }}</p>
+      <p class="blog-description">{{ description }}</p>
     </div>
     <blog-posts/>
   </div>
@@ -18,59 +18,47 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted, computed } from 'vue'
+import { defineComponent } from '@vue/composition-api'
 import BlogPosts from '@/components/BlogPosts.vue'
-import type { RichTextField, ImageField } from '@prismicio/types'
-import { usePrismic } from '@prismicio/vue'
-import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'blog-home',
   components: {
     BlogPosts
   },
-  setup() {
-    const fields = reactive({
+  data() {
+    return {
       headline: '',
       description: '',
       image: '',
-    } as {
-      headline: string,
-      description: string,
-      image: string,
-    })
-    const hasContent = ref(false)
-    const { client, asText } = usePrismic()
-    const router = useRouter()
-
-    const checkForContent = () => {
-      if (
-        fields.image ||
-        fields.headline ||
-        fields.description
-      ) {
-        hasContent.value = true
-      }
+      posts: [],
+      linkResolver: this.$prismic.linkResolver,
+      hasContent: false
     }
-
-    onMounted(async () => {
-      const document = await client.getSingle('blog_home', {})
+  },
+  mounted() {
+    this.getContent()
+  },
+  methods: {
+    async getContent() {
+      const document = await this.$prismic.client.getSingle('blog_home', {})
       if (document) {
-        fields.headline = asText(document.data.headline as RichTextField)
-        fields.description = asText(document.data.description as RichTextField)
-        fields.image = (document.data.image as ImageField)?.url ?? ''
-        checkForContent()
+        this.headline = this.$prismic.asText(document.data.headline)
+        this.description = this.$prismic.asText(document.data.description)
+        this.image = document.data.image.url
       } else {
-        router.push({ name: 'not-found' })
+        this.$router.push({ name: 'not-found' })
       }
-    })
-
-    return {
-      backgroundImage: computed(() => fields.image ? `url(${fields.image})` : ''),
-      hasContent,
-      fields,
+    },
+  },
+  computed: {
+    backgroundImage(): string {
+      return this.image ? `url(${this.image})` : ''
+    },
+    hasContent(): boolean {
+      return !!(this.image ||  this.headline || this.description)
     }
-  }
+  },
 })
 </script>
 
