@@ -8,7 +8,7 @@ import linkResolver from './link-resolver'
 
 const Elements = RichText.Elements
 
-const serializer: HTMLFunctionSerializer = (type, element: any, content, children) => {
+const serializer: HTMLFunctionSerializer = (type: string, element: any, content: string, children: any[]) => {
   // Generate links to Prismic Documents as <router-link> components
   // Present by default, it is recommended to keep this
   if (type === Elements.hyperlink) {
