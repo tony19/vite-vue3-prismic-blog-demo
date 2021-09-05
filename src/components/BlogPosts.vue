@@ -18,9 +18,8 @@
 </template>
 
 <script lang="ts">
-import { onMounted, ref, defineComponent } from 'vue'
-import { usePrismic } from '@prismicio/vue'
-import type { DateField, RichTextField, Slice, PrismicDocument } from '@prismicio/types'
+import { defineComponent } from '@vue/composition-api'
+import type { PrismicDocument, Slice } from '@prismicio/types'
 
 const getFirstParagraph = (post: PrismicDocument, textLimit = 300) => {
   if (!post.data.body) return ''
@@ -41,43 +40,42 @@ const getFirstParagraph = (post: PrismicDocument, textLimit = 300) => {
   }
 }
 
-const formatDate = (date: DateField) => {
+const formatDate = (date: string) => {
   const dateOptions = { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions
-  return Intl.DateTimeFormat('en-US', dateOptions).format(new Date(date as string))
+  return Intl.DateTimeFormat('en-US', dateOptions).format(new Date(date))
+}
+
+type PostType = {
+  id: string,
+  title: string,
+  date: string,
+  url: string,
+  firstParagraph: string,
 }
 
 export default defineComponent({
   name: 'blog-posts',
-  setup() {
-    const { client, options, predicate, asText } = usePrismic()
-    type PostType = {
-      id: string,
-      title: string,
-      date: string,
-      url: string,
-      firstParagraph: string,
+  data() {
+    return {
+      posts: [] as PostType[],
     }
-    const posts = ref([] as PostType[])
-
+  },
+  async mounted() {
+    const { asText, client, Predicates, linkResolver } = this.$prismic
     const parsePosts = (posts: PrismicDocument[]) => {
       return posts.map(post => ({
           id: post.id,
-          title: asText(post.data.title as RichTextField),
-          date: formatDate(post.data.date as DateField),
-          url: options.linkResolver?.(post as any) ?? '',
+          title: asText(post.data.title),
+          date: formatDate(post.data.date as string),
+          url: linkResolver?.(post as any) ?? '',
           firstParagraph: getFirstParagraph(post),
       }))
     }
-
-    onMounted(async () => {
-      const response = await client.get({
-        predicates: predicate.at('document.type', 'post'),
-        orderings : 'my.post.date desc',
-      })
-      posts.value = parsePosts(response.results)
-    })
-
-    return { posts }
+    const response = await client.query(
+      Predicates.at('document.type', 'post'),
+      { orderings : '[my.post.date desc]' }
+    )
+    this.posts = parsePosts(response.results as PrismicDocument[])
   }
 })
 </script>
