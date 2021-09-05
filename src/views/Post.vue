@@ -13,13 +13,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref, onMounted, computed } from 'vue'
+import { defineComponent } from '@vue/composition-api'
 import SlicesBlock from '@/components/SlicesBlock.vue'
-import type { RichTextField, DateField, Slice } from '@prismicio/types'
-import { usePrismic } from '@prismicio/vue'
-import { useRouter, useRoute, onBeforeRouteUpdate } from 'vue-router'
 
-const formatDate = (date: Date) => {
+const formatDate = (date: string) => {
   const dateOptions = { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions
   return Intl.DateTimeFormat('en-US', dateOptions).format(new Date(date))
 }
@@ -29,44 +26,35 @@ export default defineComponent({
   components: {
     SlicesBlock
   },
-  setup() {
-    const fields = reactive({
-        title: '',
-        date: null,
-      } as {
-        title: string,
-        date: Date | null,
-      }
-    )
-    const slices = ref([] as Slice[])
-
-    const { client, asText, asDate } = usePrismic()
-    const router = useRouter()
-
-    const getContent = async(uid: string) => {
-      const document = await client.getByUID('post', uid, {})
-      if (document) {
-        fields.title = asText(document.data.title as RichTextField)
-        fields.date = asDate(document.data.date as DateField) as Date
-        slices.value = document.data.body as Slice[]
-      } else {
-        router.push({ name: 'not-found' })
-      }
-    }
-
-    onBeforeRouteUpdate((to, from, next) => {
-      getContent(to.params.uid as string)
-      next()
-    })
-
-    onMounted(() => getContent(useRoute().params.uid as string))
-
+  data() {
     return {
-      date: computed(() => fields.date ? formatDate(fields.date as Date) : ''),
-      slices,
-      title: fields.title,
+      dateOptions: { year: 'numeric', month: 'short', day: '2-digit' },
+      documentId: '',
+      title: '',
+      date: '',
+      slices: []
     }
-  }
+  },
+  created() {
+    this.getContent(this.$route.params.uid)
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.getContent(to.params.uid)
+    next()
+  },
+  methods: {
+    async getContent(uid: string) {
+      const document = await this.$prismic.client.getByUID('post', uid, {})
+      if (document) {
+        this.documentId = document.id
+        this.title = document.data.title
+        this.date = formatDate(document.data.date as string)
+        this.slices = document.data.body
+      } else {
+        this.$router.push({ name: 'not-found' })
+      }
+    }
+  },
 })
 </script>
 
