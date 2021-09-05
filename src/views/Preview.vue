@@ -5,25 +5,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { usePrismic } from '@prismicio/vue'
+import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'preview',
-  setup() {
-    onMounted(async () => {
-      const { token, documentId } = useRoute().query
-      const { client, options } = usePrismic()
-
-      const url = await client.resolvePreviewURL({
-        linkResolver: options.linkResolver,
-        defaultURL: '/',
-        previewToken: token as string,
-        documentId: documentId as string,
-      })
-      window.location.replace(url)
-    })
-  }
+  async beforeCreate() {
+    const { token, documentId } = this.$route.query
+    const url = await this.$prismic.client.getPreviewResolver(token as string, documentId as string).resolve(this.$prismic.linkResolver, '/')
+    window.location.replace(url)
+ }
 })
 </script>
