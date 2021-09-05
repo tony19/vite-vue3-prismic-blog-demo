@@ -13,21 +13,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'not-found',
-  setup() {
-    const attemptedRoute = reactive({} as { path: string, name: string })
-
-    onMounted(() => {
-      const route = useRoute()
-      attemptedRoute.path = route.path
-      attemptedRoute.name = route.name as string
+  data() {
+    return {
+      attemptedRoute: {} as { path: string, name: string }
+    }
+  },
+  beforeRouteEnter(to, from, next) {
+    next(vm => {
+      (vm as any).attemptedRoute = {
+        path: from.path,
+        name: from.name,
+      }
     })
-
-    return { attemptedRoute }
-  }
+  },
 })
 </script>
