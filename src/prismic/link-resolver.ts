@@ -2,9 +2,9 @@
  * To learn more about Link Resolving check out the Prismic documentation
  * https://prismic.io/docs/vuejs/beyond-the-api/link-resolving
  */
-import type { LinkResolverFunction } from '@prismicio/helpers'
+import type { FilledLinkToDocumentField } from '@prismicio/types'
 
-const resolver: LinkResolverFunction<string> = doc => {
+const resolver = (doc: FilledLinkToDocumentField) => {
   if (doc.isBroken) {
     return '/not-found'
   }
