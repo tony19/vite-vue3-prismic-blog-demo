@@ -2,13 +2,12 @@
  * To learn more about HTML Serializer check out the Prismic documentation
  * https://prismic.io/docs/vuejs/beyond-the-api/html-serializer
  */
-import type { HTMLFunctionSerializer } from '@prismicio/helpers'
 import { Link, RichText } from 'prismic-dom'
 import linkResolver from './link-resolver'
 
 const Elements = RichText.Elements
 
-const serializer: HTMLFunctionSerializer = (type: string, element: any, content: string, children: any[]) => {
+const serializer = (type: string, element: any, content: string, children: any[]) => {
   // Generate links to Prismic Documents as <router-link> components
   // Present by default, it is recommended to keep this
   if (type === Elements.hyperlink) {
