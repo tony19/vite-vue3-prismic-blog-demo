@@ -15,6 +15,7 @@
 <script lang="ts">
 import { defineComponent } from '@vue/composition-api'
 import SlicesBlock from '@/components/SlicesBlock.vue'
+import type { Slice } from '@prismicio/types'
 
 const formatDate = (date: string) => {
   const dateOptions = { year: 'numeric', month: 'short', day: '2-digit' } as Intl.DateTimeFormatOptions
@@ -32,7 +33,7 @@ export default defineComponent({
       documentId: '',
       title: '',
       date: '',
-      slices: []
+      slices: [] as Slice[],
     }
   },
   created() {
